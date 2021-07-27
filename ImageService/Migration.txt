@@ -1,0 +1,5 @@
+﻿get-help add-migration -detailed
+add-migration -Name InitialCreate -OutputDir Persistence/Migrations/
+Update-Database
+
+migrationBuilder.Sql("CREATE TRIGGER TRG_IMAGE_UpdateModifiedDate ON dbo.Image AFTER UPDATE AS UPDATE dbo.Image SET Modified = sysdatetime() WHERE Id IN (SELECT DISTINCT Id FROM inserted)");
