@@ -2,7 +2,6 @@
 using ImageServiceApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,19 +13,15 @@ namespace ImageServiceApi.Controllers
     public class ImageController : ControllerBase
     {
         private readonly IImageService _imageService;
-        private readonly ILogger<ImageController> _logger;
 
         public ImageController(
-            IImageService imageService,
-            ILogger<ImageController> logger)
+            IImageService imageService
+            )
         {
             _imageService = imageService;
-            _logger = logger;
         }
 
-
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UploadResponse))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<UploadResponse>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ApiResponse<string>))]
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file, CancellationToken cancellationToken = default)
@@ -44,7 +39,7 @@ namespace ImageServiceApi.Controllers
             var response = await _imageService
                 .GetImageByIdAsync(id, cancellationToken)
                 .ConfigureAwait(false);
-            return File(response.ImageStream, response.MimeType, false);
+            return File(response.Data.ImageStream, response.Data.MimeType, false);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]

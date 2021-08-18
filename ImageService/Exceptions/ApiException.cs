@@ -12,5 +12,9 @@ namespace ImageServiceApi.Exceptions
         {
             Errors = errors;
         }
+        public ApiException(string message, string error) : base(message)
+        {
+            Errors = new List<string> { error };
+        }
     }
 }

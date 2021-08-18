@@ -1,4 +1,5 @@
-﻿using ImageServiceApi.Configurations.Models;
+﻿using ImageServiceApi.Builders;
+using ImageServiceApi.Configurations.Models;
 using ImageServiceApi.Models;
 using ImageServiceApi.Models.Responses;
 using ImageServiceApi.Persistence;
@@ -26,7 +27,7 @@ namespace ImageServiceApi.Services
             _options = options;
         }
 
-        public async Task<UploadResponse> AddFileAsync(IFormFile file, CancellationToken cancellationToken = default)
+        public async Task<ApiResponse<UploadResponse>> AddFileAsync(IFormFile file, CancellationToken cancellationToken = default)
         {
             if (file is null || file.Length < 1)
                 throw new ArgumentException($"{nameof(file)} could not be null or empty", nameof(file));
@@ -44,10 +45,15 @@ namespace ImageServiceApi.Services
             await _unitOfWork.Images.AddAsync(image, cancellationToken).ConfigureAwait(false);
             await _unitOfWork.CompleteAsync(cancellationToken).ConfigureAwait(false);
 
-            return new UploadResponse(image.Id);
+
+            return ApiResponseBuilder<UploadResponse>
+                .Create()
+                .WithData(new UploadResponse(image.Id))
+                .IsSucceeded()
+                .Build();
         }
 
-        public async Task<ImageResponse> GetImageByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<ApiResponse<ImageResponse>> GetImageByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             var image = await _unitOfWork.Images
                 .GetAsync(id, cancellationToken)
@@ -61,12 +67,17 @@ namespace ImageServiceApi.Services
             if (!File.Exists(path))
                 throw new FileNotFoundException($"Image with Id: {id} not found localy");
 
-            return new ImageResponse
-            {
-                ImageStream = GetFileStream(path),
-                MimeType = image.MimeType,
-                Name = image.Name
-            };
+
+            return ApiResponseBuilder<ImageResponse>
+                .Create()
+                .WithData(new ImageResponse
+                {
+                    ImageStream = GetFileStream(path),
+                    MimeType = image.MimeType,
+                    Name = image.Name
+                })
+                .IsSucceeded()
+                .Build();
         }
 
         private FileStream GetFileStream(string path) => new(path, FileMode.Open, FileAccess.Read, FileShare.Read, _options.Value.BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
