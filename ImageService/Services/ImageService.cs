@@ -1,5 +1,6 @@
 ﻿using ImageServiceApi.Builders;
 using ImageServiceApi.Configurations.Models;
+using ImageServiceApi.Exceptions;
 using ImageServiceApi.Models;
 using ImageServiceApi.Models.Responses;
 using ImageServiceApi.Persistence;
@@ -30,10 +31,22 @@ namespace ImageServiceApi.Services
         public async Task<ApiResponse<UploadResponse>> AddFileAsync(IFormFile file, CancellationToken cancellationToken = default)
         {
             if (file is null || file.Length < 1)
-                throw new ArgumentException($"{nameof(file)} could not be null or empty", nameof(file));
+            {
+                ApiExceptionBuilder<ImageNullReferenceException>
+                    .Create()
+                    .WithMessage("Adding image failed")
+                    .WithError($"{nameof(file)} can not be null or empty")
+                    .Throw();
+            }
 
             if (!_options.Value.SupportedMimeTypes.Contains(file.ContentType))
-                throw new InvalidDataException($"{file.ContentType} not supported");
+            {
+                ApiExceptionBuilder<MimeTypeNotSupportedException>
+                    .Create()
+                    .WithMessage("Adding image failed")
+                    .WithError($"Type: {file.ContentType} not supported")
+                    .Throw();
+            }
 
             var fileStream = file.OpenReadStream();
             var checksum =  GetHashFromStream(fileStream);
@@ -44,7 +57,6 @@ namespace ImageServiceApi.Services
             var image = new Image { Name = file.FileName, PhysicalDirectory = _options.Value.DefaultPath, MimeType = file.ContentType, PhysicalFileName = checksum };
             await _unitOfWork.Images.AddAsync(image, cancellationToken).ConfigureAwait(false);
             await _unitOfWork.CompleteAsync(cancellationToken).ConfigureAwait(false);
-
 
             return ApiResponseBuilder<UploadResponse>
                 .Create()
@@ -60,13 +72,24 @@ namespace ImageServiceApi.Services
                 .ConfigureAwait(false);
 
             if (image is null)
-                throw new FileNotFoundException($"Image with Id: {id} not found");
+            {
+                ApiExceptionBuilder<ImageNotFoundException>
+                    .Create()
+                    .WithMessage("Getting Image failed")
+                    .WithError($"Image with Id: {id} not found")
+                    .Throw();
+            }
 
             var path = Path.Combine(image.PhysicalDirectory, image.PhysicalFileName);
 
             if (!File.Exists(path))
-                throw new FileNotFoundException($"Image with Id: {id} not found localy");
-
+            {
+                ApiExceptionBuilder<ImageNotFoundException>
+                    .Create()
+                    .WithMessage("Getting Image failed")
+                    .WithError($"Image with Id: {id} not found localy")
+                    .Throw();
+            }
 
             return ApiResponseBuilder<ImageResponse>
                 .Create()

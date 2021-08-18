@@ -15,7 +15,9 @@ namespace ImageServiceApi.Middlewares
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlerMiddleware> _logger;
 
-        public ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionHandlerMiddleware> logger)
+        public ExceptionHandlerMiddleware(
+            RequestDelegate next, 
+            ILogger<ExceptionHandlerMiddleware> logger)
         {
             _next = next;
             _logger = logger;
@@ -35,11 +37,12 @@ namespace ImageServiceApi.Middlewares
 
                 switch (error)
                 {
-    
                     case KeyNotFoundException:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
-
+                    case ImageNotFoundException:
+                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                        break;
                     case ApiException:
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         responseModel.Errors = ((ApiException)error).Errors;

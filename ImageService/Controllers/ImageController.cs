@@ -22,6 +22,7 @@ namespace ImageServiceApi.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<UploadResponse>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ApiResponse<string>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ApiResponse<string>))]
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file, CancellationToken cancellationToken = default)
@@ -31,7 +32,8 @@ namespace ImageServiceApi.Controllers
 
 
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ApiResponse<string>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<string>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ApiResponse<string>))]
         [HttpGet("/{id:long}")]
         public async Task<IActionResult> Get(long id, CancellationToken cancellationToken = default)
@@ -43,7 +45,8 @@ namespace ImageServiceApi.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ApiResponse<string>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<string>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ApiResponse<string>))]
         [HttpGet("/{id:long}/w{width:int}")]
         public async Task<IActionResult> GetResizedWidth(long id,int width, CancellationToken cancellationToken = default)
@@ -52,7 +55,8 @@ namespace ImageServiceApi.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ApiResponse<string>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ApiResponse<string>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ApiResponse<string>))]
         [HttpGet("/{id:long}/h{heigth:int}")]
         public async Task<IActionResult> GetResizedHeigth(long id, int heigth, CancellationToken cancellationToken = default)
