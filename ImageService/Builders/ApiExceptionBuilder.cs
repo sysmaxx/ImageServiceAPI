@@ -1,6 +1,7 @@
 ﻿using ImageServiceApi.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Reflection;
 
 namespace ImageServiceApi.Builders
@@ -41,6 +42,12 @@ namespace ImageServiceApi.Builders
             return WithErrors(new List<string> { error });
         }
 
+        public IApiExceptionBuilderThrowableStage<TException> WithStatusCode(HttpStatusCode statusCode)
+        {
+            _exception.StatusCode = (int)statusCode;
+            return this;
+        }
+
         public TException Build()
         {
             return _exception;
@@ -50,7 +57,6 @@ namespace ImageServiceApi.Builders
         {
             throw _exception;
         }
-
 
     }
 }

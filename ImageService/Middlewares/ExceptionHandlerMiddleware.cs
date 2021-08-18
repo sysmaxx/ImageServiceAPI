@@ -29,26 +29,24 @@ namespace ImageServiceApi.Middlewares
             {
                 await _next(context);
             }
-            catch (Exception error)
+            catch (Exception ex)
             {
                 var response = context.Response;
                 response.ContentType = "application/json";
-                var responseModel = new ApiResponse<string>(error?.Message);
+                var responseModel = new ApiResponse<string>(ex?.Message);
 
-                switch (error)
+                switch (ex)
                 {
                     case KeyNotFoundException:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
-                    case ImageNotFoundException:
-                        response.StatusCode = (int)HttpStatusCode.NotFound;
-                        break;
                     case ApiException:
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
-                        responseModel.Errors = ((ApiException)error).Errors;
+                        var apiException = ex as ApiException;
+                        response.StatusCode = apiException.StatusCode ??= (int)HttpStatusCode.BadRequest;
+                        responseModel.Errors = apiException.Errors;
                         break;
                     default:
-                        _logger.LogError(error, "Middleware catched unhandled Exception", null);
+                        _logger.LogError(ex, "Middleware catched unhandled Exception", null);
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         break;
                 }

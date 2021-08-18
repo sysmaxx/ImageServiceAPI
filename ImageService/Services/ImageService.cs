@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using static ImageServiceApi.Utility.HashUtility;
@@ -77,6 +78,7 @@ namespace ImageServiceApi.Services
                     .Create()
                     .WithMessage("Getting Image failed")
                     .WithError($"Image with Id: {id} not found")
+                    .WithStatusCode(HttpStatusCode.NotFound)
                     .Throw();
             }
 
@@ -88,6 +90,7 @@ namespace ImageServiceApi.Services
                     .Create()
                     .WithMessage("Getting Image failed")
                     .WithError($"Image with Id: {id} not found localy")
+                    .WithStatusCode(HttpStatusCode.NotFound)
                     .Throw();
             }
 
