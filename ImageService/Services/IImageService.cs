@@ -7,7 +7,7 @@ namespace ImageServiceApi.Services
 {
     public interface IImageService
     {
-        Task<UploadSuccessResponse> AddFileAsync(IFormFile file, CancellationToken cancellationToken = default);
+        Task<UploadResponse> AddFileAsync(IFormFile file, CancellationToken cancellationToken = default);
         Task<ImageResponse> GetImageByIdAsync(long id, CancellationToken cancellationToken = default);
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 
 namespace ImageServiceApi.Configurations
 {
-    public static class SwaggerConfigurator
+    public static class ServiceCollectionExtensions
     {
         public static void ConfigureSwagger(this IServiceCollection services)
         {

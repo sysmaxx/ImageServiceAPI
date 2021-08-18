@@ -18,13 +18,15 @@ namespace ImageServiceApi.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOptions<ImageServiceConfiguration> _options;
 
-        public ImageService(IUnitOfWork unitOfWork, IOptions<ImageServiceConfiguration> options)
+        public ImageService(
+            IUnitOfWork unitOfWork, 
+            IOptions<ImageServiceConfiguration> options)
         {
             _unitOfWork = unitOfWork;
             _options = options;
         }
 
-        public async Task<UploadSuccessResponse> AddFileAsync(IFormFile file, CancellationToken cancellationToken = default)
+        public async Task<UploadResponse> AddFileAsync(IFormFile file, CancellationToken cancellationToken = default)
         {
             if (file is null || file.Length < 1)
                 throw new ArgumentException($"{nameof(file)} could not be null or empty", nameof(file));
@@ -42,7 +44,7 @@ namespace ImageServiceApi.Services
             await _unitOfWork.Images.AddAsync(image, cancellationToken).ConfigureAwait(false);
             await _unitOfWork.CompleteAsync(cancellationToken).ConfigureAwait(false);
 
-            return new UploadSuccessResponse(image.Id);
+            return new UploadResponse(image.Id);
         }
 
         public async Task<ImageResponse> GetImageByIdAsync(long id, CancellationToken cancellationToken = default)

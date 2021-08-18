@@ -24,41 +24,48 @@ namespace ImageServiceApi.Controllers
             _logger = logger;
         }
 
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
-        [HttpGet("/{id:long}")]
-        public async Task<IActionResult> Get(long id, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var response = await _imageService
-                    .GetImageByIdAsync(id, cancellationToken)
-                    .ConfigureAwait(false);
-                return File(response.ImageStream, response.MimeType, false);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message, new object[] { id });
-                return BadRequest(new ErrorResponse(ex.Message));
-            }
-        }
 
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UploadSuccessResponse))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UploadResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ApiResponse<string>))]
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                return Ok(await _imageService.AddFileAsync(file, cancellationToken).ConfigureAwait(false));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message, new object[] { file });
-                return BadRequest(new ErrorResponse(ex.Message));
-            }
+            return Ok(await _imageService.AddFileAsync(file, cancellationToken).ConfigureAwait(false));
         }
+
+
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ApiResponse<string>))]
+        [HttpGet("/{id:long}")]
+        public async Task<IActionResult> Get(long id, CancellationToken cancellationToken = default)
+        {
+            var response = await _imageService
+                .GetImageByIdAsync(id, cancellationToken)
+                .ConfigureAwait(false);
+            return File(response.ImageStream, response.MimeType, false);
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ApiResponse<string>))]
+        [HttpGet("/{id:long}/w{width:int}")]
+        public async Task<IActionResult> GetResizedWidth(long id,int width, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ApiResponse<string>))]
+        [HttpGet("/{id:long}/h{heigth:int}")]
+        public async Task<IActionResult> GetResizedHeigth(long id, int heigth, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+
 
     }
 }

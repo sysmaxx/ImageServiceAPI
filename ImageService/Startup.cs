@@ -72,6 +72,8 @@ namespace ImageServiceApi
 
             app.UseAuthorization();
 
+            app.UseExceptionHandlingMiddleware();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
