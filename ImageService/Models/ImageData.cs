@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace ImageServiceApi.Models
 {
@@ -12,5 +13,6 @@ namespace ImageServiceApi.Models
         public bool Deleted { get; set; }
         public DateTime Created { get; set; }
         public DateTime Modified { get; set; }
+        public string LocalFilePath => Path.Combine(PhysicalDirectory, PhysicalFileName);
     }
 }

@@ -8,6 +8,7 @@ using ImageServiceApi.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using static ImageServiceApi.Utility.HashUtility;
 using static ImageServiceApi.Utility.ImageUtility;
+using static ImageServiceApi.Extensions.ImageExtensions;
 
 namespace ImageServiceApi.Services
 {
@@ -60,8 +62,8 @@ namespace ImageServiceApi.Services
             if (!File.Exists(@filePath))
             {
                 using var img = GetImageFromStream(fileStream);
-                var newSize = GetImageSizeToMaxEdgeLength(img, _options.ResizeUploadImageLongEdge);
-                using var resizedImage = await GetResizedImageAsync(img, newSize).ConfigureAwait(false);
+                var size = GetImageSizeToMaxEdgeLength(img, _options.ResizeUploadImageLongEdge);
+                using var resizedImage = await GetResizedImageAsync(img, size).ConfigureAwait(false);
                 resizedImage.Save(filePath, ImageFormat.Jpeg);
             }
 
@@ -78,6 +80,68 @@ namespace ImageServiceApi.Services
 
         public async Task<ApiResponse<ImageResponse>> GetImageByIdAsync(long id, CancellationToken cancellationToken = default)
         {
+            var image = await FindImageAsync(id, cancellationToken).ConfigureAwait(false);
+            CheckLocalFileExists(image);
+
+            return ApiResponseBuilder<ImageResponse>
+                .Create()
+                .WithData(new ImageResponse
+                {
+                    ImageStream = GetFileStream(image.LocalFilePath),
+                    MimeType = image.MimeType,
+                    Name = image.Name
+                })
+                .IsSucceeded()
+                .Build();
+        }
+
+        public async Task<ApiResponse<ImageResponse>> GetImageByIdWithAbsoluteWidthAsync(
+            long id, int width, CancellationToken cancellationToken = default)
+        {
+            var image = await FindImageAsync(id, cancellationToken).ConfigureAwait(false);
+            CheckLocalFileExists(image);
+
+            using var img = GetImageFromStream(GetFileStream(image.LocalFilePath));
+            var size = GetImageSizeToAbsoluteWidth(img, width);
+            using var resizedImage = await GetResizedImageAsync(img, size).ConfigureAwait(false);
+
+            return ApiResponseBuilder<ImageResponse>
+                .Create()
+                .WithData(new ImageResponse
+                {
+                    ImageStream = resizedImage.ToStream(ImageFormat.Jpeg),
+                    MimeType = image.MimeType,
+                    Name = image.Name
+                })
+                .IsSucceeded()
+                .Build();
+        }
+
+        public async Task<ApiResponse<ImageResponse>> GetImageByIdWithAbsoluteHeightAsync(
+            long id, int heigth, CancellationToken cancellationToken = default)
+        {
+            var image = await FindImageAsync(id, cancellationToken).ConfigureAwait(false);
+            CheckLocalFileExists(image);
+
+            using var img = GetImageFromStream(GetFileStream(image.LocalFilePath));
+            var size = GetImageSizeToAbsoluteHeight(img, heigth);
+            using var resizedImage = await GetResizedImageAsync(img, size).ConfigureAwait(false);
+
+            return ApiResponseBuilder<ImageResponse>
+                .Create()
+                .WithData(new ImageResponse
+                {
+                    ImageStream = resizedImage.ToStream(ImageFormat.Jpeg),
+                    MimeType = image.MimeType,
+                    Name = image.Name
+                })
+                .IsSucceeded()
+                .Build();
+        }
+
+
+        private async Task<ImageData> FindImageAsync(long id, CancellationToken cancellationToken)
+        {
             var image = await _unitOfWork.Images
                 .GetAsync(id, cancellationToken)
                 .ConfigureAwait(false);
@@ -92,31 +156,26 @@ namespace ImageServiceApi.Services
                     .Throw();
             }
 
-            var path = Path.Combine(image.PhysicalDirectory, image.PhysicalFileName);
-
-            if (!File.Exists(path))
+            return image;
+        }
+        private static void CheckLocalFileExists(ImageData image)
+        {
+            if (!File.Exists(image.LocalFilePath))
             {
                 ApiExceptionBuilder<ImageNotFoundException>
                     .Create()
                     .WithMessage("Getting Image failed")
-                    .WithError($"Image with Id: {id} not found localy")
+                    .WithError($"Image with Id: {image.Id} not found localy")
                     .WithStatusCode(HttpStatusCode.NotFound)
                     .Throw();
             }
-
-            return ApiResponseBuilder<ImageResponse>
-                .Create()
-                .WithData(new ImageResponse
-                {
-                    ImageStream = GetFileStream(path),
-                    MimeType = image.MimeType,
-                    Name = image.Name
-                })
-                .IsSucceeded()
-                .Build();
         }
-
         private FileStream GetFileStream(string path) => new(path, FileMode.Open, FileAccess.Read, FileShare.Read, _options.BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
+
+        //private FileStream GetFileStream(Image image)
+        //{
+
+        //}
 
     }
 }

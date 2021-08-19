@@ -51,7 +51,10 @@ namespace ImageServiceApi.Controllers
         [HttpGet("/{id:long}/w{width:int}")]
         public async Task<IActionResult> GetResizedWidth(long id,int width, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var response = await _imageService
+                .GetImageByIdWithAbsoluteWidthAsync(id, width, cancellationToken)
+                .ConfigureAwait(false);
+            return File(response.Data.ImageStream, response.Data.MimeType, false);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
@@ -61,7 +64,10 @@ namespace ImageServiceApi.Controllers
         [HttpGet("/{id:long}/h{heigth:int}")]
         public async Task<IActionResult> GetResizedHeigth(long id, int heigth, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var response = await _imageService
+                .GetImageByIdWithAbsoluteHeightAsync(id, heigth, cancellationToken)
+                .ConfigureAwait(false);
+            return File(response.Data.ImageStream, response.Data.MimeType, false);
         }
 
 
