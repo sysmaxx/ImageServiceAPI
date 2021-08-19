@@ -8,6 +8,7 @@ using ImageServiceApi.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -60,8 +61,8 @@ namespace ImageServiceApi.Services
             {
                 using var img = GetImageFromStream(fileStream);
                 var newSize = GetImageSizeToMaxEdgeLength(img, _options.ResizeUploadImageLongEdge);
-                using var resizedImage = await GetResizeImageAsync(img, newSize).ConfigureAwait(false);
-                resizedImage.Save(filePath);
+                using var resizedImage = await GetResizedImageAsync(img, newSize).ConfigureAwait(false);
+                resizedImage.Save(filePath, ImageFormat.Jpeg);
             }
 
             var image = new ImageData { Name = file.FileName, PhysicalDirectory = _options.DefaultPath, MimeType = MimeTypes.JPG, PhysicalFileName = fileName };

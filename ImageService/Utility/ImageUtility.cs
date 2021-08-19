@@ -35,10 +35,10 @@ namespace ImageServiceApi.Utility
             return new(width, height);
         }
 
-        public static  Task<Image> GetResizeImageAsync(Image image, Size size)
+        public static Task<Image> GetResizedImageAsync(Image image, Size size)
         {
-            using var bmp = new Bitmap(size.Width, size.Height, PixelFormat.Format24bppRgb);
-            using var graphics = Graphics.FromImage(bmp);
+            var result = new Bitmap(size.Width, size.Height, PixelFormat.Format24bppRgb);
+            using var graphics = Graphics.FromImage(result);
 
             graphics.InterpolationMode = InterpolationMode.Low;
             graphics.CompositingQuality = CompositingQuality.HighSpeed;
@@ -46,10 +46,7 @@ namespace ImageServiceApi.Utility
             graphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
             graphics.DrawImage(image, new Rectangle(0, 0, size.Width, size.Height));
 
-            var imageStream = new MemoryStream();
-            bmp.Save(imageStream, ImageFormat.Jpeg);
-
-            return Task.FromResult(Image.FromStream(imageStream));
+            return Task.FromResult((Image)result);
         }
     }
 }
