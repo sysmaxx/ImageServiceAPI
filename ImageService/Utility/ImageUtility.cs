@@ -14,16 +14,20 @@ namespace ImageServiceApi.Utility
         public static Image GetImageFromFile(string imagePath) => Image.FromFile(imagePath);
         public static Size GetImageSize(Image image) => new(image.Width, image.Height);
 
-        public static Size GetImageSizeToAbsoluteWidth(Image image, int width)
+        public static Size GetImageSizeToAbsoluteWidth(Image image, int requestedWidth)
         {
-            var scale = (double)width / image.Width;
+            // ToDo limit to max resolution of Image
+            var scale = requestedWidth < image.Width ? (double)requestedWidth / image.Width : 1;
+            var width = Convert.ToInt32(Math.Floor(image.Width * scale));
             var height = Convert.ToInt32(Math.Floor(image.Height * scale));
             return new(width, height);
         }
-        public static Size GetImageSizeToAbsoluteHeight(Image image, int height)
+        public static Size GetImageSizeToAbsoluteHeight(Image image, int requestedHeight)
         {
-            var scale = (double)height / image.Height;
+            // ToDo limit to max resolution of Image
+            var scale = requestedHeight < image.Height ? (double)requestedHeight / image.Height : 1;
             var width = Convert.ToInt32(Math.Floor(image.Width * scale));
+            var height = Convert.ToInt32(Math.Floor(image.Height * scale));
             return new(width, height);
         }
 
@@ -37,6 +41,9 @@ namespace ImageServiceApi.Utility
 
         public static Task<Image> GetResizedImageAsync(Image image, Size size)
         {
+            if (image.Size == size)
+                return Task.FromResult(image);
+
             var result = new Bitmap(size.Width, size.Height, PixelFormat.Format24bppRgb);
             using var graphics = Graphics.FromImage(result);
 

@@ -172,10 +172,5 @@ namespace ImageServiceApi.Services
         }
         private FileStream GetFileStream(string path) => new(path, FileMode.Open, FileAccess.Read, FileShare.Read, _options.BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
 
-        //private FileStream GetFileStream(Image image)
-        //{
-
-        //}
-
     }
 }
