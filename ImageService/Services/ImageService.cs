@@ -2,6 +2,7 @@
 using ImageServiceApi.Configurations.Models;
 using ImageServiceApi.Exceptions;
 using ImageServiceApi.Models;
+using ImageServiceApi.Models.Enums;
 using ImageServiceApi.Models.Responses;
 using ImageServiceApi.Persistence;
 using Microsoft.AspNetCore.Http;
@@ -13,20 +14,21 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using static ImageServiceApi.Utility.HashUtility;
+using static ImageServiceApi.Utility.ImageUtility;
 
 namespace ImageServiceApi.Services
 {
     public class ImageService : IImageService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IOptions<ImageServiceConfiguration> _options;
+        private readonly ImageServiceConfiguration _options;
 
         public ImageService(
             IUnitOfWork unitOfWork, 
             IOptions<ImageServiceConfiguration> options)
         {
             _unitOfWork = unitOfWork;
-            _options = options;
+            _options = options?.Value;
         }
 
         public async Task<ApiResponse<UploadResponse>> AddFileAsync(IFormFile file, CancellationToken cancellationToken = default)
@@ -40,7 +42,7 @@ namespace ImageServiceApi.Services
                     .Throw();
             }
 
-            if (!_options.Value.SupportedMimeTypes.Contains(file.ContentType))
+            if (!_options.SupportedMimeTypes.Contains(file.ContentType))
             {
                 ApiExceptionBuilder<MimeTypeNotSupportedException>
                     .Create()
@@ -51,11 +53,18 @@ namespace ImageServiceApi.Services
 
             var fileStream = file.OpenReadStream();
             var checksum =  GetHashFromStream(fileStream);
-            var filePath = Path.Combine(_options.Value.DefaultPath, checksum);
+            var fileName = $"{checksum}.jpg";
+            var filePath = Path.Combine(_options.DefaultPath, fileName);
 
-            await WriteFileIfNotExistsAsync(file, filePath, cancellationToken).ConfigureAwait(false);
+            if (!File.Exists(@filePath))
+            {
+                using var img = GetImageFromStream(fileStream);
+                var newSize = GetImageSizeToMaxEdgeLength(img, _options.ResizeUploadImageLongEdge);
+                using var resizedImage = await GetResizeImageAsync(img, newSize).ConfigureAwait(false);
+                resizedImage.Save(filePath);
+            }
 
-            var image = new Image { Name = file.FileName, PhysicalDirectory = _options.Value.DefaultPath, MimeType = file.ContentType, PhysicalFileName = checksum };
+            var image = new ImageData { Name = file.FileName, PhysicalDirectory = _options.DefaultPath, MimeType = MimeTypes.JPG, PhysicalFileName = fileName };
             await _unitOfWork.Images.AddAsync(image, cancellationToken).ConfigureAwait(false);
             await _unitOfWork.CompleteAsync(cancellationToken).ConfigureAwait(false);
 
@@ -106,15 +115,7 @@ namespace ImageServiceApi.Services
                 .Build();
         }
 
-        private FileStream GetFileStream(string path) => new(path, FileMode.Open, FileAccess.Read, FileShare.Read, _options.Value.BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
+        private FileStream GetFileStream(string path) => new(path, FileMode.Open, FileAccess.Read, FileShare.Read, _options.BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
 
-        private static async Task WriteFileIfNotExistsAsync(IFormFile file, string filePath, CancellationToken cancellationToken = default)
-        {
-            if (!File.Exists(@filePath))
-            {
-                using Stream outStream = File.OpenWrite(@filePath);
-                await file.CopyToAsync(outStream, cancellationToken).ConfigureAwait(false);
-            }
-        }
     }
 }

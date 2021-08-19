@@ -2,7 +2,7 @@
 
 namespace ImageServiceApi.Models
 {
-    public class Image
+    public class ImageData
     {
         public long Id { get; set; }
         public string Name { get; set; }

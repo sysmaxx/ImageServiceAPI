@@ -7,5 +7,6 @@ namespace ImageServiceApi.Configurations.Models
         public string DefaultPath { get; set; }
         public IEnumerable<string> SupportedMimeTypes { get; set; }
         public int BufferSize { get; set; }
+        public double ResizeUploadImageLongEdge { get; set; }
     }
 }

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ImageServiceApi.Persistence.Configurations
 {                      
-    public class ImageConfiguration : IEntityTypeConfiguration<Image>
+    public class ImageConfiguration : IEntityTypeConfiguration<ImageData>
     {
-        public void Configure(EntityTypeBuilder<Image> builder)
+        public void Configure(EntityTypeBuilder<ImageData> builder)
         {
             builder.HasKey(c => c.Id);
 
@@ -44,7 +44,7 @@ namespace ImageServiceApi.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.ToTable(nameof(Image));
+            builder.ToTable("Image");
         }
     }
 }

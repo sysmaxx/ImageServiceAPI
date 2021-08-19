@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ImageServiceApi.Persistence.Repositories
 {
-    public class ImageRepository : Repository<Image>, IImageRepository
+    public class ImageRepository : Repository<ImageData>, IImageRepository
     {
         public ImageRepository(DbContext context) : base(context)
         {

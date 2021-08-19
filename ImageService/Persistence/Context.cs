@@ -15,7 +15,7 @@ namespace ImageServiceApi.Persistence
         {
         }
 
-        public virtual DbSet<Image> Images { get; set; }
+        public virtual DbSet<ImageData> Images { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
