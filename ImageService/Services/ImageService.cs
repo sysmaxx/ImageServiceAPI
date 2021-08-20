@@ -8,7 +8,6 @@ using ImageServiceApi.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
-using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -54,7 +53,7 @@ namespace ImageServiceApi.Services
                     .Throw();
             }
 
-            var fileStream = file.OpenReadStream();
+            using var fileStream = file.OpenReadStream();
             var checksum =  GetHashFromStream(fileStream);
             var fileName = $"{checksum}.jpg";
             var filePath = Path.Combine(_options.DefaultPath, fileName);

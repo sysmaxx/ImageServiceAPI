@@ -16,7 +16,6 @@ namespace ImageServiceApi.Utility
 
         public static Size GetImageSizeToAbsoluteWidth(Image image, int requestedWidth)
         {
-            // ToDo limit to max resolution of Image
             var scale = requestedWidth < image.Width ? (double)requestedWidth / image.Width : 1;
             var width = Convert.ToInt32(Math.Floor(image.Width * scale));
             var height = Convert.ToInt32(Math.Floor(image.Height * scale));
@@ -24,7 +23,6 @@ namespace ImageServiceApi.Utility
         }
         public static Size GetImageSizeToAbsoluteHeight(Image image, int requestedHeight)
         {
-            // ToDo limit to max resolution of Image
             var scale = requestedHeight < image.Height ? (double)requestedHeight / image.Height : 1;
             var width = Convert.ToInt32(Math.Floor(image.Width * scale));
             var height = Convert.ToInt32(Math.Floor(image.Height * scale));
