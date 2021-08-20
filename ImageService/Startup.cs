@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace ImageServiceApi
 {
@@ -28,8 +29,11 @@ namespace ImageServiceApi
             services.AddOptions();
             services.Configure<ImageServiceConfiguration>(Configuration.GetSection(typeof(ImageServiceConfiguration).Name));
 
+            var serverVersion = new MySqlServerVersion(new Version(8, 0, 26));
             services.AddDbContext<Context>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("SQLServer")));
+                options.UseMySql(Configuration.GetConnectionString("SQLServer"), serverVersion)
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors());
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IImageService, ImageService>();

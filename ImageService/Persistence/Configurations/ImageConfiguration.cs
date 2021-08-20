@@ -12,12 +12,12 @@ namespace ImageServiceApi.Persistence.Configurations
 
             builder.Property(e => e.Created)
                 .HasColumnType("datetime")
-                .HasDefaultValueSql("(sysdatetime())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .ValueGeneratedOnAdd();
 
             builder.Property(e => e.Modified)
                 .HasColumnType("datetime")
-                .HasDefaultValueSql("(sysdatetime())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .ValueGeneratedOnAddOrUpdate();
 
             builder.Property(e => e.Name)

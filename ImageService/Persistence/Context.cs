@@ -20,7 +20,7 @@ namespace ImageServiceApi.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("Relational:Collation", "Latin1_General_CI_AS");
+            modelBuilder.HasAnnotation("Relational:Collation", "Latin1_General_CI");
             modelBuilder.ApplyConfiguration(new ImageConfiguration());
         }
 
